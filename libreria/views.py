@@ -6,7 +6,7 @@ from django.contrib import messages
 
 from libreria.carrito import Carrito
 
-from .models import Articulo, Tipo, Usuario
+from .models import *
 from .forms import ArticuloForm, RegisterForm
 from django.contrib.auth import authenticate, login, logout
 from django import template
@@ -16,7 +16,9 @@ from django.http import FileResponse
 import csv
 import io
 from reportlab.pdfgen import canvas
-
+from django.http import JsonResponse
+import json
+import datetime
 # Create your views here.
 def Registro(request):
         if request.user.is_authenticated:
@@ -134,8 +136,87 @@ def limpiar_carrito(request):
         carrito.limpiar()
         return redirect("libros")
 
+def cart(request):
+        if request.user.is_authenticated:
+                usuario = request.user
+                orden, created = Orden.objects.get_or_create(usuario=usuario, completado=False)
+                items = OrdenItem.objects.all()
+
+        else:
+                items = []
+                orden ={'get_cart_total':0, 'get_cart_items':0}
+        
+        context={'items':items, 'orden': orden}
+        return render(request, 'paginas/cart.html', context)
+
+def checkout(request):
+        if request.user.is_authenticated:
+                usuario = request.user
+                orden, created = Orden.objects.get_or_create(usuario=usuario, completado=False)
+                items = OrdenItem.objects.all()
+
+        else:
+                items = []
+                orden ={'get_cart_total':0, 'get_cart_items':0}
+        
+        context={'items':items, 'orden': orden}
+        return render(request, 'paginas/checkout.html', context)
+
+def updateItem(request):
+	data = json.loads(request.body)
+	productId = data['productId']
+	action = data['action']
+	print('Action:', action)
+	print('Product:', productId)
+
+	usuario = request.user
+	product = Articulo.objects.get(id=productId)
+	order, created = Orden.objects.get_or_create(usuario=usuario, completado=False)
+
+	ordenItem, created = OrdenItem.objects.get_or_create(orden=order, producto=product)
+
+	if action == 'add':
+		ordenItem.cantidad = (ordenItem.cantidad + 1)
+	elif action == 'remove':
+		ordenItem.cantidad = (ordenItem.cantidad - 1)
+
+	ordenItem.save()
+
+	if ordenItem.cantidad <= 0:
+		ordenItem.delete()
+
+	return JsonResponse('Item was added', safe=False)
+
+def processOrder(request): 
+        transaction_id = datetime.datetime.now().timestamp()
+        data = json.loads(request.body)
+
+        if request.user.is_authenticated:
+                usuario = request.user
+                orden, created = Orden.objects.get_or_create(usuario=usuario, completado=False)
+                total = (data['form']['total'])
+                orden.transaccion_id = transaction_id
+
+                if total == orden.get_cart_total:
+                        orden.completado = True
+                orden.save()
+
+                if orden.shipping == True:
+                        DireccionEntrega.objects.create(
+                                usuario = usuario,
+                                orden = orden,
+                                direccion = data['shipping']['address'],
+                                ciudad = data['shipping']['city'],
+                                region = data['shipping']['state'],
+                                codigo_postal = data['shipping']['zipcode'],
+                        )
+        else:
+                print('user is not login')
+        return JsonResponse('Payment complete', safe=False)
 
 register = template.Library() 
+
+
 
 # Para exportar un CSV, el cual obtiene de los articulos el nombre, precio y el stock
 def article_list(request):

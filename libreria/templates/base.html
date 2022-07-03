@@ -9,7 +9,7 @@
          <!-- mobile metas -->
    <meta name="viewport" content="width=device-width, initial-scale=1">
    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
-
+   <link rel="stylesheet" href="/CSS/main.css">
          <!-- bootstrap css -->
    <link rel="stylesheet" href="/CSS/bootstrap.min.css">
          <!-- style css -->
@@ -20,8 +20,27 @@
          <!-- Scrollbar Custom CSS -->
    <link rel="stylesheet" href="/CSS/jquery.mCustomScrollbar.min.css">
          <!-- Tweaks for older IEs-->
-      <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen">
+   <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen">
+   <script type="text/javascript">
+      var user = '{{request.user}}'
+      function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+         const cookies = document.cookie.split(';');
+         for (let i = 0; i < cookies.length; i++) {
+               const cookie = cookies[i].trim();
+               // Does this cookie string begin with the name we want?
+               if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+               }
+     }
+      }
+      return cookieValue;
+   }
+   var csrftoken = getCookie('csrftoken');
+   </script>
    
    </head>
 
@@ -36,7 +55,7 @@
                      <div class="full">
                         <div class="center-desk">
                            <div class="logo">
-                              <a href="index.html"><img src="imagenes/plusultranuevo.png" width="70" alt="#" /></a>
+                              <a href="inicio.html"><img src="imagenes/plusultranuevo.png" width="70" alt="#" /></a>
                            </div>
                         </div>
                      </div>
@@ -52,9 +71,6 @@
                                  <a class="nav-link" href="{% url 'inicio' %}">Inicio</a>
                               </li>
                               <li class="nav-item">
-                                 <a class="nav-link" href="about.html">About</a>
-                              </li>
-                              <li class="nav-item">
                                  <a class="nav-link" href="{% url 'libros' %}">Libros</a>
                               </li>
                               <li class="nav-item">
@@ -66,13 +82,36 @@
                               <li class="nav-item">
                                  <a class="nav-link" href="contact.html">Contactanos</a>
                               </li>
+                              <li class="nav-item">
+                                 {% if user.is_authenticated %}
+                                 <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                                 {% else %}
+                                 <a class="nav-link" href="{% url 'registro' %}">Registrarse</a>
+                                 {% endif %}
+                              </li>
+                              <li class="nav-item">
+                                 {% if user.is_authenticated %}
+                                 {% else %}
+                                 <a class="nav-link" href="{% url 'login' %}">Login</a>
+                                 {% endif %}
+                              </li>
+                              <li class="nav-item">
+                                 <a class="nav-link"> Hola, {{request.user}}</a>
+                              </li>
+                              
                               <li class="nav-item d_none">
                                  <a class="nav-link" href="#"><i class="fa fa-search" aria-hidden="true"></i></a>
                               </li>
-                              <li class="nav-item d_none">
-                                 <a class="nav-link" href="#">Login</a>
-                              </li>
+                              
                            </ul>
+                           <div class="form-inline my-2 my-lg-0">        
+                              <a href="{% url 'cart' %}">
+                                <img  id="cart-icon" src="imagenes/carrito.png">
+                             </a>
+                             <p id="cart-total">{{cartItems}}</p>
+                   
+                          </div>
+                        </div>
                         </div>
                      </nav>
                   </div>
@@ -315,8 +354,29 @@
       </div>
       <!-- end customer -->
 
-      <!--  contact -->
-      <div class="contact">
+     
+      <!--  footer -->
+
+      {% endif %}
+      <!-- end footer -->
+      <!-- Javascript files-->
+     
+      {% if request.path != '/' %}
+      <section class="banner_main">
+         <div background-color = class="container">
+            <div background-color = class="container">
+               <div class="row">
+                  <div class="col-12">
+                     <br/>
+                        {% block contenido %}  {% endblock %}
+                  </div>
+               </div>
+            </div>
+         </div>
+      </section>
+      {% endif %}
+       <!--  contact -->
+       <div class="contact">
          <div class="container">
             <div class="row">
                <div class="col-md-12">
@@ -351,18 +411,17 @@
          </div>
       </div>
       <!-- end contact -->
-      <!--  footer -->
       <footer>
          <div class="footer">
             <div class="container">
                <div class="row">
                   <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
-                     <img class="logo1" src="imagenes/plusultranuevo.png"  width="90" alt="#"/>
+                     <img class="logo1" src="imagenes/plusultra.png"  width="90" alt="#"/>
                      <ul class="social_icon">
                         <li><a href="#"><i class="fa fa-facebook" aria-hidden="true"></i></a></li>
                         <li><a href="#"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
                         <li><a href="#"><i class="fa fa-linkedin-square" aria-hidden="true"></i></a></li>
-                        <li><a href="#"><i class="fa fa-instagram" aria-hidden="true"></i></a></li>
+                        <li><a href="https://instagram.com/plusultralibreria?igshid=YmMyMTA2M2Y="><i class="fa fa-instagram" aria-hidden="true"></i></a></li>
                      </ul>
                   </div>
                   <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
@@ -397,9 +456,8 @@
             </div>
          </div>
       </footer>
-      {% endif %}
-      <!-- end footer -->
-      <!-- Javascript files-->
+      
+
       <script src="js/jquery.min.js"></script>
       <script src="js/popper.min.js"></script>
       <script src="js/bootstrap.bundle.min.js"></script>
@@ -409,22 +467,9 @@
       <script src="js/custom.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
   
+      
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy" crossorigin="anonymous"></script>
-      <section class="banner_main">
-         <div background-color = class="container">
-            <div background-color = class="container">
-               <div class="row">
-                  <div class="col-12">
-                     <br/>
-                        {% block contenido %}  {% endblock %}
-                  </div>
-               </div>
-            </div>
-         </div>
-      </section>
-
-  
-  
+      <script type=" text/javascript" src="js/carrito.js"></script>
   
    </body>
    <!-- Bootstrap JavaScript Libraries -->
