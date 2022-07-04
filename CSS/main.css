@@ -49,6 +49,7 @@ h1,h2,h3,h4,h5,h6{
 
 .col-lg-4, .col-lg-6, .col-lg-8, .col-lg-12{
 	margin-top: 10px;
+	
 }
 
 .btn{
@@ -98,3 +99,8 @@ h1,h2,h3,h4,h5,h6{
 .hidden{
 	display: none!important;
 }
+.img-center {
+	margin:0 auto;
+	display:block;
+  }
+  
